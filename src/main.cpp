@@ -10,7 +10,7 @@ constexpr int LEFT_BOTTOM_TOP_PORT = 21;
 constexpr int RIGHT_BOTTOM_TOP_PORT = 18;
 constexpr int BOTTOM_INTAKE_PORT = 1;
 constexpr int TOP_INTAKE_PORT = 9;
-constexpr int OUTAKE_PORT = 8;
+constexpr int OUTTAKE_PORT = 8;
 
 // --------------------- Motors ---------------------
 
@@ -28,8 +28,8 @@ pros::Motor RightBottomTop(RIGHT_BOTTOM_TOP_PORT, pros::MotorGears::blue, pros::
 pros::Motor BottomIntake(BOTTOM_INTAKE_PORT, pros::MotorGears::green, pros::MotorUnits::degrees);
 pros::Motor TopIntake(TOP_INTAKE_PORT, pros::MotorGears::green, pros::MotorUnits::degrees);
 
-// Outake (Blue Cartridge / 600 RPM)
-pros::Motor Outake(OUTAKE_PORT, pros::MotorGears::blue, pros::MotorUnits::degrees);
+// Outtake (Blue Cartridge / 600 RPM)
+pros::Motor Outtake(OUTTAKE_PORT, pros::MotorGears::blue, pros::MotorUnits::degrees);
 
 // --------------------- Sensors ---------------------
 // IMU on port 16
@@ -68,7 +68,7 @@ void initialize() {
 
 
     // Reverse Outtake
-    Outake.set_reversed(true);
+    Outtake.set_reversed(true);
 
     // 3. Random Seed
     initializeRandomSeed();
@@ -116,8 +116,8 @@ void opcontrol() {
     bool R2_lastState = false;
     bool L1_lastState = false;
     bool L2_lastState = false;
-    bool outakeToggleForward = false;
-    bool outakeToggleReverse = false;
+    bool outtakeToggleForward = false;
+    bool outtakeToggleReverse = false;
 
     bool pistonStateDescore = false;
     bool A_lastStateDescore = false;
@@ -150,20 +150,20 @@ void opcontrol() {
         R1_lastState = R1_currentState;
         R2_lastState = R2_currentState;
 
-        // Outake Logic (L1 Forward, L2 Reverse)
+        // Outtake Logic (L1 Forward, L2 Reverse)
         bool L1_currentState = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
         bool L2_currentState = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
 
         if (L1_currentState && !L1_lastState) {
             // L1 now toggles FORWARD
-            outakeToggleForward = !outakeToggleForward;
-            if (outakeToggleForward) outakeToggleReverse = false;
+            outtakeToggleForward = !outtakeToggleForward;
+            if (outtakeToggleForward) outtakeToggleReverse = false;
         }
 
         if (L2_currentState && !L2_lastState) {
             // L2 now toggles REVERSE
-            outakeToggleReverse = !outakeToggleReverse;
-            if (outakeToggleReverse) outakeToggleForward = false;
+            outtakeToggleReverse = !outtakeToggleReverse;
+            if (outtakeToggleReverse) outtakeToggleForward = false;
         }
 
         L1_lastState = L1_currentState;
@@ -196,20 +196,20 @@ void opcontrol() {
         BottomIntake.move(intakePower);
         TopIntake.move(intakePower);
 
-        int outakePower = 0;
-        if (outakeToggleForward)
-            outakePower = 127;
-        else if (outakeToggleReverse)
-            outakePower = -127;
+        int outtakePower = 0;
+        if (outtakeToggleForward)
+            outtakePower = 127;
+        else if (outtakeToggleReverse)
+            outtakePower = -127;
 
-        Outake.move(outakePower);
+        Outtake.move(outtakePower);
 
 
         // LCD Feedback
         pros::lcd::print(1, "Intake: %s", intakeToggleForward ? "FWD" : intakeToggleReverse ? "REV" : "OFF");
-        pros::lcd::print(2, "Outake: %s",
-            outakeToggleForward ? "FWD" :
-            outakeToggleReverse ? "REV" :
+        pros::lcd::print(2, "Outtake: %s",
+            outtakeToggleForward ? "FWD" :
+            outtakeToggleReverse ? "REV" :
             "OFF"
         );
         pros::lcd::print(3, "Descore (A): %s", pistonStateDescore ? "OUT" : "IN");
