@@ -1,5 +1,5 @@
 // src/main.cpp
-#include "main.h" // ALWAYS include this in PROS, not the individual headers
+#include "main.h" // ALWAYS include this in PROS
 
 // --------------------- Motor Ports ---------------------
 constexpr int LEFT_TOP_PORT = 2;
@@ -13,8 +13,6 @@ constexpr int TOP_INTAKE_PORT = 9;
 constexpr int OUTAKE_PORT = 8;
 
 // --------------------- Motors ---------------------
-// Note: We use POSITIVE port numbers here. We will reverse them in initialize()
-// to prevent global initialization crashes.
 
 // Left Drive
 pros::Motor LeftTopM(LEFT_TOP_PORT, pros::MotorGears::blue, pros::MotorUnits::degrees);
@@ -38,8 +36,6 @@ pros::Motor Outake(OUTAKE_PORT, pros::MotorGears::blue, pros::MotorUnits::degree
 pros::Imu Inertial16(16);
 
 // Pneumatics
-// Ensure these letters match the ADI ports on the brain (A-H)
-// RENAMED: DigitalOutPortH is now Descore, DigitalOutPortB is now Scoop
 pros::adi::DigitalOut DigitalOutADescore('H');
 pros::adi::DigitalOut DigitalOutBScoop('B');
 
@@ -61,7 +57,6 @@ void initialize() {
     pros::lcd::initialize();
     pros::lcd::set_text(1, "System Booting...");
 
-    // 2. Set Motor Reversals HERE (Safer than doing it in the definition)
     // Right side is usually reversed in tank drive
     LeftTopM.set_reversed(false);
     LeftBottomM.set_reversed(false);
@@ -72,7 +67,7 @@ void initialize() {
     RightBottomTop.set_reversed(false);
 
 
-    // You had Outake reversed in your original code:
+    // Reverse Outtake
     Outake.set_reversed(true);
 
     // 3. Random Seed
@@ -175,7 +170,7 @@ void opcontrol() {
         L2_lastState = L2_currentState;
 
 
-        // Pneumatics: Descore (Button A) - Uses original DigitalOutAScoop('H') now renamed to DigitalOutADescore
+        // Pneumatics: Descore (Button A) - Uses original DigitalOutAScoop('H')
         bool A_currentState = master.get_digital(pros::E_CONTROLLER_DIGITAL_A);
         if (A_currentState && !A_lastStateDescore) {
             pistonStateDescore = !pistonStateDescore;
@@ -183,7 +178,7 @@ void opcontrol() {
         }
         A_lastStateDescore = A_currentState;
 
-        // Pneumatics: Scoop (Button B) - Uses original DigitalOutBDescore('B') now renamed to DigitalOutBScoop
+        // Pneumatics: Scoop (Button B) - Uses original DigitalOutBDescore('B')
         bool B_currentState = master.get_digital(pros::E_CONTROLLER_DIGITAL_B);
         if (B_currentState && !B_lastStateScoop) {
             pistonStateScoop = !pistonStateScoop;
@@ -210,7 +205,7 @@ void opcontrol() {
         Outake.move(outakePower);
 
 
-        // LCD Feedback (Updated text to match new button mappings)
+        // LCD Feedback
         pros::lcd::print(1, "Intake: %s", intakeToggleForward ? "FWD" : intakeToggleReverse ? "REV" : "OFF");
         pros::lcd::print(2, "Outake: %s",
             outakeToggleForward ? "FWD" :
